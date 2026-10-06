@@ -26,28 +26,38 @@ export default function ModernContact() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+
+  const getGmailUrl = () => {
+    const subject = encodeURIComponent(formState.subject || "Software Engineering Opportunity");
+    const body = encodeURIComponent(
+      `Hi Vaibhav,\n\n${formState.message || "I came across your portfolio and would like to connect."}\n\nBest regards,\n${formState.name || "Recruiter / Collaborator"}\n${formState.email}`
+    );
+    return `https://mail.google.com/mail/?view=cm&fs=1&to=${personalInfo.email}&su=${subject}&body=${body}`;
+  };
+
+  const getMailtoUrl = () => {
+    const subject = encodeURIComponent(formState.subject || "Software Engineering Opportunity");
+    const body = encodeURIComponent(
+      `Hi Vaibhav,\n\n${formState.message || "I came across your portfolio and would like to connect."}\n\nBest regards,\n${formState.name || "Recruiter / Collaborator"}\n${formState.email}`
+    );
+    return `mailto:${personalInfo.email}?subject=${subject}&body=${body}`;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Trigger confetti celebration
     try {
       confetti({
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
       });
-    } catch (err) {
-      // fallback
-    }
+    } catch (err) {}
 
-    // Open mail client with prefilled fields
-    const mailtoLink = `mailto:${personalInfo.email}?subject=${encodeURIComponent(
-      formState.subject
-    )}&body=${encodeURIComponent(
-      `From: ${formState.name} (${formState.email})\n\n${formState.message}`
-    )}`;
-    window.location.href = mailtoLink;
+    // Open direct Gmail compose tab in browser which is guaranteed to work across all platforms
+    window.open(getGmailUrl(), "_blank", "noopener,noreferrer");
     setSubmitted(true);
+    setShowOptions(true);
   };
 
   const copyEmail = () => {
@@ -276,13 +286,35 @@ export default function ModernContact() {
                 className="w-full gap-2 font-bold"
               >
                 <Send size={16} />
-                <span>Transmit Message via Mail</span>
+                <span>Send via Gmail Web</span>
               </Button>
 
+              <div className="flex items-center gap-2 pt-1">
+                <a
+                  href={getMailtoUrl()}
+                  className="flex-1 text-center rounded-xl border border-white/10 bg-white/5 py-2.5 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition"
+                >
+                  Open in Default Mail App
+                </a>
+                <button
+                  type="button"
+                  onClick={copyEmail}
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-xs font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition"
+                  title="Copy email address"
+                >
+                  {copiedEmail ? "Email Copied!" : "Copy Email"}
+                </button>
+              </div>
+
               {submitted && (
-                <div className="mt-3 flex items-center justify-center gap-2 text-xs font-medium text-emerald-400">
-                  <CheckCircle2 size={16} />
-                  <span>Mail client dispatched! Feel free to follow up directly.</span>
+                <div className="mt-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300 space-y-1">
+                  <div className="flex items-center gap-2 font-semibold">
+                    <CheckCircle2 size={16} className="text-emerald-400" />
+                    <span>Gmail compose tab opened with your message prefilled!</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 pl-6">
+                    If popups were blocked, you can also click "Open in Default Mail App" or send directly to <span className="text-white font-mono">{personalInfo.email}</span>.
+                  </p>
                 </div>
               )}
             </form>
