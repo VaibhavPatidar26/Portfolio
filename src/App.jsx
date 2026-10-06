@@ -1,42 +1,76 @@
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import Projects from "./components/Projects";
-import Skills from "./components/Skills";
-import Education from "./components/Education";
-import Contact from "./components/Contact";
-import Footer from "./components/Footer";
-
-import { projects } from "./data/projects";
+import React, { useState, useEffect } from "react";
+import InteractiveCanvasBackground from "./components/InteractiveCanvasBackground";
+import ModernNavbar from "./components/ModernNavbar";
+import ModernHero from "./components/ModernHero";
+import ModernProjects from "./components/ModernProjects";
+import ModernSkills from "./components/ModernSkills";
+import ModernExperienceEducation from "./components/ModernExperienceEducation";
+import ModernContact from "./components/ModernContact";
+import ModernFooter from "./components/ModernFooter";
 
 function App() {
-  const scrollTo = (id) => {
-    const section = document.getElementById(id);
+  const [activeSection, setActiveSection] = useState("home");
 
-    if (section) {
-      section.scrollIntoView({
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
     }
   };
 
+  useEffect(() => {
+    const sectionIds = ["home", "work", "skills", "education", "contact"];
+    const handleScroll = () => {
+      const scrollPos = window.scrollY + 200;
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(id);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-zinc-950 text-white overflow-x-hidden">
-      <Navbar scrollTo={scrollTo} />
+    <div className="relative min-h-screen bg-[#07090e] text-zinc-100 selection:bg-cyan-500 selection:text-black">
+      {/* Three.js Interactive 3D Canvas Background */}
+      <InteractiveCanvasBackground />
 
-      <main>
-        <Hero scrollTo={scrollTo} />
+      {/* Subtle Grid Pattern Overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+          backgroundSize: "28px 28px",
+        }}
+        aria-hidden="true"
+      />
 
-        <Projects projects={projects} />
+      {/* Top Navbar */}
+      <ModernNavbar scrollTo={scrollTo} activeSection={activeSection} />
 
-        <Skills />
-
-        <Education />
-
-        <Contact />
-
-        <Footer scrollTo={scrollTo} />
+      {/* Main Content Flow */}
+      <main className="relative z-10">
+        <ModernHero scrollTo={scrollTo} />
+        <ModernProjects />
+        <ModernSkills />
+        <ModernExperienceEducation />
+        <ModernContact />
       </main>
+
+      {/* Modern Footer */}
+      <ModernFooter scrollTo={scrollTo} />
     </div>
   );
 }
